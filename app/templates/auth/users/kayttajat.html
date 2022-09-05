@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Kotkot - käyttäjät{% endblock %}
+
+{% block page_content %}
+<script>
+    var poistaKayttaja = (id,username) => {
+        if (!confirm(`Käyttäjä ${username} poistetaan.`)) return;
+        const url = "{{ url_for('auth.poista_kayttaja',page=page) }}";
+        const formData = new FormData();
+        formData.append('id', id);
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Success:', result);
+            document.location.reload(true);
+            })
+        .catch(error => {
+            console.error('Error:', error);
+            });
+        }
+</script>
+<div class="container">
+    <div class="row">
+
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-md-10">
+                    <h2>{{ "Hallitse käyttäjät" }}</h2>
+                </div>
+                <div class="col-md-2">
+                    <span class="align-middle">
+                        <button type="button" class="btn btn-addTask" data-toggle="modal" data-target="#addTask">{{ "Lisä uusi käyttäjä" }}</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="text-center">{{ "Käyttäjät" }}</h1>
+        {% if kayttajat|length < 1 %}
+            <h3 class="text-center">{{ "Tällä hetkellä sinulla ei ole käyttäjä" }}, {{ current_user.firstName }}{{ ". Luo uusi käyttäjä?" }}</h3>
+        {% else %}
+            <table class="table table-dark">
+                <thead>
+                    <tr class="table-heading">
+                        <th>{{ "Kuva" }}</th>
+                        <th>{{ "Käyttäjätunnus" }}</th>
+                        <th>{{ "Sähköposti" }}</th>
+                        <th>{{ "Rooli" }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for kayttaja in kayttajat %}
+                            <tr class="data-hover">
+                                <td><img style="width:60px;" src="{{ kayttaja.kuva }}" alt=""></td>
+                                <td>{{ kayttaja.username }}-{{ kayttaja.id }}</td>
+                                <td>{{ kayttaja.email }}</td>
+                                <td>{{ kayttaja.role_id }}</td>
+                                <td>
+                                    <a href="/kayttajat/{{ kayttaja.id }}" class="btn btn-primary edit_button" data-toggle="modal" data-target="#editItem{{kayttaja.id}}">{{ "Muokkaa" }}</a>
+                                    <a class="btn btn-primary edit_button" title="poista" class="trash-space" href="#" onclick="poistaKayttaja('{{ kayttaja.id }}','{{ kayttaja.username }}')">
+                                        <i class="fas fa-trash-alt"></i>{{ "Poista" }}
+                                    </a>
+                                </td>
+                            </tr>
+
+                        <!-- Edit User Popup Dialog Box -->
+                        <div id="editItem{{kayttaja.id}}" class="modal fade" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="text-center modal-title">{{ "Päivitä käyttäjä" }}</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{ url_for('auth.paivita_kayttaja') }}" enctype="multipart/form-data" method="POST">
+        
+                                            <!-- <div class="form-group">
+                                                <label>{{ "Käyttäjän kuva" }}</label>
+                                                <input type="text" class="form-control" name="kuva" value="{{kayttaja.kuva}}">
+                                            </div> -->
+                                            <input type="hidden" name="id" value="{{kayttaja.id}}">
+                                            <input type="hidden" name="role_id" value="{{kayttaja.role_id}}">
+                                            <input type="hidden" name="confirmed" value="{{kayttaja.confirmed}}">
+                                            <input type="hidden" name="password_hash" value="{{kayttaja.password_hash}}">
+                                            <div class="form-group">
+                                                <label>{{ "Käyttäjän kuva" }}</label>
+                                                <input type="file" class="form-control" name="kuva" value="{{kayttaja.kuva}}" accept="image/png, image/jpeg">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>{{ "Käyttäjätunnus" }}</label>
+                                                <input type="text" class="form-control" name="username" value="{{kayttaja.username}}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>{{ "Sähköposti" }}</label>
+                                                <input type="text" class="form-control" name="email" value="{{kayttaja.email}}">
+                                            </div>
+                                            <!-- <div class="form-group">
+                                                <label>{{ "Rooli" }}</label>
+                                                <input type="text" class="form-control" name="role_id" value="{{kayttaja.role_id}}">
+                                            </div> -->
+                                            <!-- <div class="form-group">
+                                                <label>{{ "Salasana" }}</label>
+                                                <input type="text" class="form-control" name="password" value="{{kayttaja.password}}">
+                                            </div> -->
+                                            <div class="form-group">
+                                                <button class="btn btn-success" type="submit">{{ "Päivitä käyttäjä" }}</button>
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">{{ "Sulje" }}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+        {% endif %}
+
+        <!-- Add User Popup Dialog Box -->
+        <div id="addTask" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="text-center modal-title">{{ "Lisää käyttäjä" }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <!-- <form action="{{ url_for('auth.uusi_kayttaja') }}" enctype="multipart/form-data" method="POST">
+                            <div class="form-group">
+                                <label>{{ "Käyttäjän kuva" }}</label>
+                                <input type="text" class="form-control" name="kuva" value="">
+                            </div>
+                            <div class="form-group">
+                                <label>{{ "Käyttäjätunnus" }}</label>
+                                <input type="hidden" name="item_id" value="">
+                                <input type="text" class="form-control" name="username" value="">
+                            </div>
+                            <div class="form-group">
+                                <label>{{ "Sähköposti" }}</label>
+                                <input type="hidden" name="item_id" value="">
+                                <input type="text" class="form-control" name="email" value="">
+                            </div>
+                            <div class="form-group">
+                                <label>{{ "Rooli" }}</label>
+                                <input type="hidden" name="item_id" value="">
+                                <input type="text" class="form-control" name="role_id" value="">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-success" type="submit">{{ "Lisää käyttäjä" }}</button>
+                            </div>
+                        </form> -->
+
+                        {{ wtf.quick_form(form) }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">{{ "Sulje" }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

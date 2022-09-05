@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Kotkot - tehtävät{% endblock %}
+
+{% block page_content %}
+<script>
+    var poista = (id,nimi) => {
+        if (!confirm(`Tehtävä ${nimi} poistetaan.`)) return;
+        const url = "{{ url_for('auth.poista',page=page) }}";
+        const formData = new FormData();
+        formData.append('id', id);
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Success:', result);
+            document.location.reload(true);
+            })
+        .catch(error => {
+            console.error('Error:', error);
+            });
+        }
+</script>
+<div class="container">
+    <div class="row">
+
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-md-10">
+                    <h2>{{ "Hallitse tehtäviäsi" }}</h2>
+                </div>
+                <div class="col-md-2">
+                    <span class="align-middle">
+                        <button type="button" class="btn btn-addTask" data-toggle="modal" data-target="#addTask">{{ "Lisä uusi tehtävä" }}</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="text-center">{{ "Tehtävät" }}</h1>
+        {% if todoitems|length < 1 %}
+            <h3 class="text-center">{{ "Tällä hetkellä sinulla ei ole tehtäviä" }}, {{ current_user.firstName }}{{ ". Luo uusi tehtävä?" }}</h3>
+        {% else %}
+            <table class="table table-dark">
+                <thead>
+                    <tr class="table-heading">
+                        <th>{{ "Tehtävä" }}</th>
+                        <th>{{ "Kuvaus" }}</th>
+                        <th>{{ "Lisäyspäivämäärä" }}</th>
+                        <th>{{ "Päivityksen päivämäärä" }}</th>
+                        <th>{{ "Valmistumispäivä" }}</th>
+                        <th>{{ "Tila" }}</th>
+                        <th>{{ "Toiminnot" }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for todoitem in todoitems %}
+                        
+                        
+                        {% if todoitem.is_completed == True %}
+                            <tr class="data-hover">
+                                <td>{{ todoitem.title }}</td>
+                                <td>{{ todoitem.description }}</td>
+                                <td>{{ todoitem.date_created.date() }}</td>
+                                <td>
+                                    {% if todoitem.date_updated != None %}
+                                        {{ todoitem.date_updated.date() }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if todoitem.date_completed != None %}
+                                        {{ todoitem.date_completed.date()}}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge badge-completed">{{ "Tehty" }}</span></td>
+                                <td>
+                                    <a href="/update/{{ todoitem.item_id }}" class="btn btn-primary edit_button" data-toggle="modal" data-target="#muokkaa{{todoitem.item_id}}">{{ "Muokkaa" }}</a>
+                                    <a title="poista" class="trash-space" href="#" onclick="poista('{{ todoitem.id }}','{{ todoitem.nimi }}')">
+                                        <i class="fas fa-trash-alt"></i>{{ "Poistaa" }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr class="data-hover">
+                                <td>{{ todoitem.title }}</td>
+                                <td>{{ todoitem.description }}</td>
+                                <td>{{ todoitem.date_created.date()}}</td>
+                                <td>
+                                    {% if todoitem.date_updated != None %}
+                                        {{ todoitem.date_updated.date()}}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if todoitem.date_completed != None %}
+                                        {{ todoitem.date_completed.date()}}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge badge-incomplete">{{ "Ei valmis" }}</span></td>
+                                <td>
+                                    <a href="/paivita/{{ todoitem.item_id }}" class="btn btn-primary edit_button" data-toggle="modal" data-target="#muokkaa{{todoitem.item_id}}">{{ "Muokkaa" }}</a>
+                                    <a class="btn btn-primary edit_button" title="poista" class="trash-space" href="#" onclick="poista('{{ todoitem.item_id }}','{{ todoitem.title }}')">
+                                        <i class="fas fa-trash-alt"></i>{{ "Poistaa" }}
+                                    </a>
+
+                                    <a class="btn btn-primary edit_button" href="/tehty/{{ todoitem.item_id }}" class="btn btn-tobecomplete">{{ "Tehty" }}</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+
+                        <!-- Edit ToDo Item Popup Dialog Box -->
+                        <div id="muokkaa{{todoitem.item_id}}" class="modal fade" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="text-center modal-title">{{ "Päivitä tehtävä" }}</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{ url_for('auth.paivita_tehtava') }}" method="POST">
+                                            <div class="form-group">
+                                                <label>{{ "Tehtävän nimi" }}</label>
+                                                <input type="hidden" name="item_id" value="{{todoitem.item_id}}">
+                                                <input type="text" class="form-control" name="title" value="{{todoitem.title}}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>{{ "Tehtävän kuvaus" }}</label>
+                                                <input type="text" class="form-control" name="description" value="{{todoitem.description}}">
+                                            </div>
+                                            <div class="form-group">
+                                                <button class="btn btn-success" type="submit">{{ "Päivitä tehtävä" }}</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">{{ "Sulje" }}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+        {% endif %}
+
+        <!-- Add ToDo Item Popup Dialog Box -->
+        <div id="addTask" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="text-center modal-title">{{ "Lisä tehtävä" }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ url_for('auth.uusi_tehtava') }}" method="POST" autocomplete="off">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Task Title" name="title" required="1">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Task Description" name="description" required="1">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-success" type="submit">{{ "Lisä tehtävä" }}</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">{{ "Sulje" }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

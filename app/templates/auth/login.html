@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Kotkot - Kirjaudu{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Kirjaudu sisään</h1>
+</div>
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+    <br>
+    <p>Unohditko salasanasi? <a href="{{ url_for('auth.password_reset_request') }}">Vaihda salasana</a>.</p>
+    <p>Uusi käyttäjä? <a href="{{ url_for('auth.register') }}">Kirjaudu täältä</a>.</p>
+</div>
+{% endblock %}

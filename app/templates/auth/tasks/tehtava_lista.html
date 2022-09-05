@@ -1,0 +1,21 @@
+<ul class="posts">
+    {% for tehtava in lista %}
+    <li class="post">
+        <div class="post-content">
+            <div class="post-date">
+                {% if current_user.id != tehtava.user_id %}
+                <a title="poista" class="trash-space" href="#" onclick="poista('{{ tehtava.id }}','{{ tehtava.nimi }}')">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+                {% else %}
+                <span class="trash-space"></span>
+                {% endif %}
+                {{ moment(tehtava.updated).fromNow() }}
+            </div>
+            <div class="post-author"><a href="{{ url_for('.tehtava', id=tehtava.id) }}">{{ tehtava.nimi }}</a></div>
+            <div class="post-body">{{ tehtava.puhelinnumero }}</div>
+            <div class="post-body">{{ tehtava.sahkoposti }}</div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>

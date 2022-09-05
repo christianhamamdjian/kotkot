@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ "Task Management System - Task Report" }}
+{% endblock %}
+
+{% block app_content %}
+    <h1 class="text-center">{{ current_user.firstName }}{{ "\'s Task Report" }}</h1>
+
+    {% if completed_todoitems|length < 1 %}
+        <h3 class="text-center">{{ "Currently you did not complete any tasks," }} {{ current_user.firstName }}{{ '.' }}</h3>
+    {% else %}
+        <table class="table table-dark">
+            <thead>
+                <tr class="table-heading">
+                    <th>{{ "Task Name" }}</th>
+                    <th>{{ "Task Description" }}</th>
+                    <th>{{ "Date Started" }}</th>
+                    <th>{{ "Date Completed" }}</th>
+                    <!-- <th>Number of Days Worked</th> -->
+                    <th>{{ "Number Of Hours Worked" }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for completed_items in completed_todoitems %}
+                    <tr>
+                        {% if completed_items.is_completed == True %}
+                            <td class="taskreport">{{ completed_items.title }}</td>
+                            <td class="taskreport">{{ completed_items.description }}</td>
+                            <td class="taskreport">{{ moment(completed_items.date_created).format("LLL") }}</td>
+                            <td class="taskreport">{{ moment(completed_items.date_completed).format("LLL") }}</td>
+                            <!-- <td>{{ (completed_items.date_completed - completed_items.date_created).days }}&nbsp;Day(s)</td> -->
+                            <td class="taskreport">{{ ((completed_items.date_completed - completed_items.date_created).days * 24 + (completed_items.date_completed - completed_items.date_created).seconds / 3600)|int }}&nbsp;{{ "Hours" }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Kotkot - Profiili{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Moi, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}tervetuloa{% endif %}!</h1>
+    <h3>Tämä on profiilisivusi</h3>
+</div>
+          <div class="container">
+              <div class="row">
+                  <div class="col-md-6 col-md-offset-3 text-center">
+                      <h1 class="heading text-center">{{ "Task Manager" }}</h1>
+                      <div class="panel panel-default">
+                          <div class="panel-body">
+                              <h4>{{ "User:" }} {{ user.firstName }}&nbsp;{{ user.lastName }}</h4>
+                              <h4>{{ "Username:" }} {{ user.username }}</h4>
+                              <h4>{{ "Email Address:" }} {{ user.email }}</h4>
+                              {% if user == current_user %}
+                                  <p><a href="{{ url_for('auth.paivita_kayttaja') }}" class="btn btn-editProfile text-uppercase">{{ "Muokkaa profiilia" }}</a></p>
+                              {% endif %}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+   
+{% endblock %}

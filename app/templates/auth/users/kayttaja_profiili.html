@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Kotkot - Profiili{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Moi, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}tervetuloa{% endif %}!</h1>
+    <h3>Tämä on profiilisivusi</h3>
+</div>
+          <div class="container">
+              <div class="row">
+                  <div class="col-md-6 col-md-offset-3 text-left">
+                      <h1 class="heading text-center">{{ "Kotkot" }}</h1>
+                      <div class="panel panel-default">
+                          <div class="panel-body">
+                            <img style="width:60px;" src="{{ user.kuva }}" alt="">
+                              <h4>{{ "Käyttäjätunnus:" }} {{ user.username }}</h4>
+                              <h4>{{ "Sähköposti:" }} {{ user.email }}</h4>
+                              {% if user == current_user %}
+                                  <p><a href="/update/{{ user.id }}" class="btn btn-primary edit_button" data-toggle="modal" data-target="#editItem{{user.id}}">{{ "Muokkaa" }}</a>
+                                <!-- Edit User Popup Dialog Box -->
+                                <div id="editItem{{user.id}}" class="modal fade" role="dialog">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="text-center modal-title">{{ "Päivitä käyttäjä" }}</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="{{ url_for('auth.paivita_kayttaja', username=user.username) }}" method="POST">
+                                                    <div class="form-group">
+                                                        <label>{{ "Käyttäjän kuva" }}</label>
+                                                        <input type="text" class="form-control" name="kuva" value="{{user.kuva}}">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>{{ "Käyttäjätunnus" }}</label>
+                                                        <input type="hidden" name="id" value="">
+                                                        <input type="text" class="form-control" name="username" value="{{user.username}}">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>{{ "Sähköposti" }}</label>
+                                                        <input type="hidden" name="id" value="">
+                                                        <input type="text" class="form-control" name="email" value="{{user.email}}">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>{{ "Rooli" }}</label>
+                                                        <input type="hidden" name="id" value="">
+                                                        <input type="text" class="form-control" name="role_id" value="{{user.role_id}}">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button class="btn btn-success" type="submit">{{ "Päivitä käyttäjä" }}</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">{{ "Sulje" }}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                              {% endif %}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+   
+{% endblock %}

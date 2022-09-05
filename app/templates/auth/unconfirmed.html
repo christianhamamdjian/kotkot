@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Kotkot - Confirm your account{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>
+        Moi, {{ current_user.username }}!
+    </h1>
+    <h3>Et ole varhvistanut tilisi.</h3>
+    <p>
+        Olet saanut vahvistusviesti sähköpostilla. Klikkaa vahvistuslikki viestillä.  
+    </p>
+    <p>
+        Lähetä vahvistusviesti uudelleen?
+        <a href="{{ url_for('auth.resend_confirmation') }}">Klikkaa täältä</a>
+    </p>
+</div>
+{% endblock %}
